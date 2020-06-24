@@ -1,0 +1,81 @@
+<script>
+	var contractAddress = '0x1C95b093d6C236d3EF7c796fE33f9CC6b8606714';
+	var apiKey = '7PDUZNJ7QSSU71TFZSE15CZ73KQDAHBX2G';
+	var checkTimeout = 3000;
+	var transitionTimeout = 400;
+	
+	var requestUrl = "https://api.etherscan.io/api?module=stats&action=tokensupply&contractaddress="+contractAddress+"&apikey="+apiKey;
+	var requestMasterUrl = "https://api.etherscan.io/api?module=account&action=tokenbalance&contractaddress=0x1C95b093d6C236d3EF7c796fE33f9CC6b8606714&address=0xd664d29c0df13592e1847958325e468312650c0d&tag=latest&apikey=7PDUZNJ7QSSU71TFZSE15CZ73KQDAHBX2G";
+	
+	window.addEventListener('load', windowLoaded);
+	
+	function windowLoaded() {
+		supplyOutput = document.getElementById('supplyOutput');
+		masterOutput = document.getElementById('masterOutput');
+
+		checkSupply();
+		checkMasterSupply();
+	}
+	
+	function checkSupply() {
+		var xhttp = new XMLHttpRequest();
+		xhttp.onreadystatechange = function() {
+			if (this.readyState == 4) {
+				if (this.status == 200) {
+					var returnedObject = JSON.parse(this.responseText);
+					var supply = parseInt(returnedObject.result);
+					onUpdateSupply(supply);
+				}
+				setTimeout(checkSupply, checkTimeout);
+			}
+		};
+		xhttp.open("GET", requestUrl, true);
+
+		xhttp.send();
+	}
+
+	function checkMasterSupply() {
+		var xhttp = new XMLHttpRequest();
+		xhttp.onreadystatechange = function() {
+			if (this.readyState == 4) {
+				if (this.status == 200) {
+					var returnedObject = JSON.parse(this.responseText);
+					var supply = parseInt(returnedObject.result);
+					onUpdateSupply(supply);
+				}
+				setTimeout(checkMasterSupply, checkTimeout);
+			}
+		};
+		xhttp.open("GET", requestMasterUrl, true);
+		
+		xhttp.send();
+	}
+	
+	
+	function onUpdateSupply(supply) {
+		supplyOutput.innerText = supply.toLocaleString("en");
+		supplyOutput.classList.add("changed");
+		setTimeout(onUpdateSupplyEnd, transitionTimeout);
+	}
+	
+	function onUpdateSupplyEnd() {
+		supplyOutput.classList.remove("changed");
+	}
+</script>
+<style>
+#supplyContainer {
+	color: #A11;
+	font-size: 300%;
+	font-weight: 900;
+	font-family: Montserrat;
+	text-align: center;
+}
+#supplyOutput {
+	transition-property: color;
+	transition-duration: 0.4s;
+}
+#supplyOutput.changed {
+	color: red;
+}
+</style>
+<div id="supplyContainer">COVX REMAINING: <span id="supplyOutput">...</span></div>

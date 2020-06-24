@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="author" content="Dameon Green" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+		<link rel="shortcut icon" type="image/x-icon" href="images/favicon.ico">
+		<link rel="stylesheet" href="navbar.css">
+		<title>Covid-19 Coin (COVX) Supply</title>
+		<script>
+			var contractAddress = '0x1C95b093d6C236d3EF7c796fE33f9CC6b8606714';
+			//var contractAddress = '0xa996a7d4c8f4a0e96c46efbc7f1b41d8aad12387';
+			var masterCauseAddress = "0xd664d29c0df13592e1847958325e468312650c0d";
+			var apiKey = '7PDUZNJ7QSSU71TFZSE15CZ73KQDAHBX2G';
+			var checkTimeout = 5000;
+			var transitionTimeout = 400;
+			var originalTokenAmount = 1000000;
+			var masterOutput;
+			var supplyOutput;
+			var burntOutput;
+			var lastSupply;
+			var lastMaster;
+			var errorElement;
+			
+			window.addEventListener('load', windowLoaded);
+
+
+			
+			function windowLoaded() {
+				supplyOutput = document.getElementById('supplyOutput');
+				burntOutput = document.getElementById('burntOutput');
+				errorElement = document.getElementById('errorElement');
+				masterOutput = document.getElementById('masterOutput');
+				supplyOutput.innerText = originalTokenAmount.toLocaleString();
+				checkSupply();
+				checkMasterSupply();
+			}
+			
+			function setCheckTimeout() {
+				setTimeout(checkSupply, checkTimeout);
+			}
+			
+			function checkSupply() {
+				var xhttp = new XMLHttpRequest();
+				xhttp.onreadystatechange = function() {
+					if (this.readyState == 4) {
+						if (this.status == 200) {
+							var returnedObject = JSON.parse(this.responseText);
+							var supply = parseInt(returnedObject.result);
+							errorElement.classList.remove("visible");
+							onUpdateSupply(supply);
+						} else {
+							errorElement.classList.add("visible");
+						}
+						setCheckTimeout();
+					}
+				};
+				xhttp.open("GET", "https://api.etherscan.io/api?module=stats&action=tokensupply&contractaddress="+contractAddress+"&apikey="+apiKey+"", true);
+				xhttp.send();
+
+				//xhttp.open("GET", "https://api.etherscan.io/api?module=account&action=tokenbalance&contractaddress="+masterCauseAddress+"&apikey="+apiKey+"", true);
+				//xhttp.send();
+			}
+			
+			function checkMasterSupply() {
+				var xhttp = new XMLHttpRequest();
+				xhttp.onreadystatechange = function() {
+					if (this.readyState == 4) {
+						if (this.status == 200) {
+							var returnedObject = JSON.parse(this.responseText);
+							var master = parseInt(returnedObject.result);
+							errorElement.classList.remove("visible");
+							onMasterSupply(master);
+						} else {
+							errorElement.classList.add("visible");
+						}
+						setCheckTimeout();
+					}
+				};
+		
+
+				xhttp.open("GET", "https://api.etherscan.io/api?module=account&action=tokenbalance&contractaddress=0x1C95b093d6C236d3EF7c796fE33f9CC6b8606714&address=0xd664d29c0df13592e1847958325e468312650c0d&tag=latest&apikey=7PDUZNJ7QSSU71TFZSE15CZ73KQDAHBX2G", true);
+				xhttp.send();
+			}
+			
+			function onUpdateSupply(supply) {
+				burntOutput.innerText = (originalTokenAmount - supply).toLocaleString();
+				supplyOutput.innerText = supply.toLocaleString();
+				document.title = supply.toLocaleString()+" COVX Coins Left";
+				
+				if (lastSupply) {
+					if (lastSupply !== supply) {
+						supplyOutput.classList.add("changed");
+						burntOutput.classList.add("changed");
+						//masterOutput.classList.add("changed");
+					} else {
+						supplyOutput.classList.add("notchanged");
+						burntOutput.classList.add("notchanged");
+						//masterOutput.classList.add("notchanged");
+					}
+				}
+				
+				lastSupply = supply;
+				setTimeout(onUpdateSupplyEnd, transitionTimeout);
+			}
+			
+				function onMasterSupply(master) {
+				masterOutput.innerText = master.toLocaleString();
+				
+				if (lastMaster) {
+					if (lastMaster !== master) {
+						masterOutput.classList.add("changed");
+					} else {
+						masterOutput.classList.add("notchanged");
+					}
+				}
+				
+				lastMaster = master;
+				setTimeout(onUpdateMasterEnd, transitionTimeout);
+			}
+
+
+			function onUpdateSupplyEnd() {
+				supplyOutput.classList.remove("notchanged");
+				supplyOutput.classList.remove("changed");
+				burntOutput.classList.remove("notchanged");
+				burntOutput.classList.remove("changed");
+				//masterOutput.classList.remove("notchanged");
+				//masterOutput.classList.remove("changed");
+			}
+
+			function onUpdateMasterEnd() {
+				
+				masterOutput.classList.remove("notchanged");
+				masterOutput.classList.remove("changed");
+			}
+
+		</script>
+		<script
+			    src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+			    integrity="sha256-pasqAKBDmFT4eHoN2ndd6lN370kFiGUFyTiUHWhU7k8="
+			    crossorigin="anonymous"></script>
+			    <script>
+			    $(function() {
+			    $(".toggle").on("click", function() {
+			        if ($(".item").hasClass("active")) {
+			            $(".item").removeClass("active");
+			        } else {
+			            $(".item").addClass("active");
+			        }
+			    });
+			});
+    	</script>
+		<style>
+			h2 {
+				font-size: 46px;
+				/*color: #04d07d; */
+				color:#f42f54;
+
+			}
+			body {
+				margin: 0;
+			}
+			
+			.card {
+				padding: 0.8em;
+				margin: 50px auto;
+				width: 80%;
+				max-width: 500px;
+				box-shadow: 0 5px 8px rgba(100, 100, 100, 0.5),
+							2px 0 4px rgba(100, 100, 100, 0.5),
+							2px 0 4px rgba(100, 100, 100, 0.5);
+							border-radius: 8px;
+							font-family: 'Avenir';
+
+			}
+			
+			.card h2 {
+				margin: 0;
+				font-size: 200%;
+				font-weight: 800;
+				font-family: 'Avenir';
+				color: #162332;
+
+			}
+			
+			.card .divider {
+				width: 90%;
+				height: 1px;
+				background: #bbb;
+				margin: 5px 0;
+			}
+			
+			.card .cardContent {
+				text-align: center;
+				font-size: 400%;
+				font-weight: 600;
+			}
+			
+			.cardContent {
+				/*color: #04d07d; */
+				color:#f42f54;
+				background-color:#162332;
+				transition-property: color, background;
+				transition-duration: 0.4s;
+				font-family: 'Avenir';
+				}
+			
+			.cardContent.notchanged {
+				color: grey;
+			}
+			
+			.cardContent.changed {
+				background-color: red;
+			}
+			
+			a, a:visited {
+				text-decoration: underline;
+				color: #55a;
+			}
+			
+			a:focus, a:hover, a:active {
+				text-decoration: none;
+			}
+			
+			#errorElement {
+				background: #c22;
+				box-shadow: 0 5px 8px rgba(100, 100, 100, 0.5),
+							2px 0 4px rgba(100, 100, 100, 0.5),
+							2px 0 4px rgba(100, 100, 100, 0.5);
+				color: white;
+				font-weight: bold;
+				padding: 5px;
+				text-align: center;
+				transition-property: transform;
+				transition-duration: 0.3s;
+				overflow: hidden;
+				transform: scaleY(0);
+				font-family: 'Avenir';
+
+			}
+			
+			#errorElement.visible {
+				transform: scaleY(1);
+			}
+			#big-title {
+				font-family: Avenir;
+				font-size: 36px;
+				text-align: center;
+				color: gray;
+				margin-left: 60px;
+				margin-right: 60px;
+				padding-bottom: 40px;
+				padding-top: 60px;
+			}
+			#big-sub {
+				font-family: Avenir;
+				font-size: 20px;
+				text-align: center;
+				color: black;
+				margin-left: 60px;
+				margin-right: 60px;
+			}
+			#container {
+				background-color: #f1f1f1;
+			}
+
+		</style>
+	</head>
+	<body id="container">
+		<nav>
+        <ul class="menu">
+            <li class="logo"><a href="#">COVX Tracker</a></li>
+            <li class="item"><a href="#">Home</a></li>
+            <li class="item"><a href="#">About</a></li>
+            <li class="item"><a href="#">Services</a></li>
+            </li>
+            <li class="item button"><a href="http://Covid-19coin.io">COVX Platform</a></li>
+            <li class="item button secondary"><a href="#">Github</a></li>
+            <li class="toggle"><span class="bars"></span></li>
+        </ul>
+    </nav>
+		<div id="big-title"><h2>Covid-19 Coin (COVX)-Tracker</h2></div>
+		<div id="big-sub"><h4>Up to the minute COVX Supply tracker</h4></div>
+
+		<div id="errorElement">Error getting latest values! Check internet connection or adblocker!</div>
+		<div style="margin-top: 5px" class="card">
+			<h2>Total Supply</h2>
+			<div class="divider"></div>
+			<div class="cardContent" id="supplyOutput">0</div>
+			<noscript>
+				<h2>Active Javascript!</h2>
+			</noscript>
+		</div>
+		<div class="card">
+			<h2>Burnt Tokens</h2>
+			<div class="divider"></div>
+			<div class="cardContent" id="burntOutput">0</div>
+			<noscript>
+				<h2>Active Javascript!</h2>
+			</noscript>
+		</div>
+		<div class="card">
+			<h2>Tokens In Cause Wallet</h2>
+			<div class="divider"></div>
+			<div class="cardContent" id="masterOutput">0</div>
+			<noscript>
+				<h2>Active Javascript!</h2>
+			</noscript>
+		</div>
+		<div class="card">
+			<h2>Current Causes Wallet</h2>
+			<div class="divider"></div>
+			<div class="cardContent" id="burntOutput">0</div>
+			<noscript>
+				<h2>Active Javascript!</h2>
+			</noscript>
+		</div>
+		<div class="card">
+			<h2>Tokens Donated to Date</h2>
+			<div class="divider"></div>
+			<div class="cardContent" id="burntOutput">0</div>
+			<noscript>
+				<h2>Active Javascript!</h2>
+			</noscript>
+		</div>
+		<div class="card">
+			<h2>Tokens In Future Fund</h2>
+			<div class="divider"></div>
+			<div class="cardContent" id="burntOutput">0</div>
+			<noscript>
+				<h2>Active Javascript!</h2>
+			</noscript>
+		</div>
+		<div class="card">
+			<h2>Founder's Tokens</h2>
+			<div class="divider"></div>
+			<div class="cardContent" id="burntOutput">0</div>
+			<noscript>
+				<h2>Active Javascript!</h2>
+			</noscript>
+		</div>
+
+		<div class="card">
+			<h2>What is this Website ?</h2>
+			<div class="divider"></div>
+			<p>This Page tracks the <strong>total supply</strong> and <strong>burnt tokens</strong> of the BTRP (Better Token Project) token</p>
+			<p>It refreshes itself from <a href="https://etherscan.io/apis#tokens">Etherscan</a> and shows the results</p>
+			<p>
+				<span style="color: red">Red</span>: values have changed
+				</br>
+				<span style="color: blue">Blue</span>: values have not changed
+			</p>
+			<ul>
+				<li><a href="https://etherscan.io/token/0x1C95b093d6C236d3EF7c796fE33f9CC6b8606714">Token-Contract</a></li>
+				<li><a href="https://Covid-19coin.io/">Covid-19 Coin (COVX) Homepage</a></li>
+				<li><a href="https://t.me/joinchat/AAAAAFERZcyHv-NcN8bRKg">Telegram</a></li>
+				<li><a href="https://www.reddit.com/user/CoinCovx">Reddit</a></li>
+				<li><a href="https://twitter.com/CoinCovx">Twitter</a></li>
+			</ul>
+		</div>
+		<div>
+			<main>
+        	<a href="https://youtube.com/c/FollowAndrew" style="position:fixed;bottom:0;color:teal;display:block;text-align:center;font-size:1em">https://youtube.com/c/FollowAndrew</a>
+   		 </main>
+		</div>
+		<div style="text-align: center; color: gray; margin-bottom: 10px; font-family: 'Avenir';
+">
+			<a href="https://github.com/bombtracker/bombtracker.github.io/">Source Code</a> - Made by the Better Token Project Community...Original Idea From Ulrich Stark
+		</div>
+	</body>
+</html>
