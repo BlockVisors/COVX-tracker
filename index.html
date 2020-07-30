@@ -33,7 +33,7 @@
 				burntOutput = document.getElementById('burntOutput');
 				errorElement = document.getElementById('errorElement');
 				masterOutput = document.getElementById('masterOutput');
-				supplyOutput.innerText = originalTokenAmount.toLocaleString();
+				supplyOutput.innerText = originalTokenAmount
 				checkSupply();
 				checkMasterSupply();
 			}
@@ -48,7 +48,7 @@
 					if (this.readyState == 4) {
 						if (this.status == 200) {
 							var returnedObject = JSON.parse(this.responseText);
-							var supply = parseInt(returnedObject.result);
+							var supply = parseFloat(returnedObject.result);
 							errorElement.classList.remove("visible");
 							onUpdateSupply(supply);
 						} else {
@@ -70,7 +70,7 @@
 					if (this.readyState == 4) {
 						if (this.status == 200) {
 							var returnedObject = JSON.parse(this.responseText);
-							var master = parseInt(returnedObject.result);
+							var master = parseFloat(returnedObject.result);
 							errorElement.classList.remove("visible");
 							onMasterSupply(master);
 						} else {
@@ -85,10 +85,16 @@
 				xhttp.send();
 			}
 			
+			function formatNumber(num) {
+  				return parseFloat(num).toFixed(3);
+				}
+
 			function onUpdateSupply(supply) {
-				burntOutput.innerText = (originalTokenAmount - supply).toLocaleString('en-US', { minimumFractionDigits: 4 });
-				supplyOutput.innerText = supply.toLocaleString('en-US', { minimumFractionDigits: 4 });
-				document.title = supply.toLocaleString('en-US', { minimumFractionDigits: 4 })+" COVX Coins Left";
+				
+				//supplyOutput.innerText = (supplyOutput.slice(0,supplyOutput.length - 18) + "." + supplyOutput.slice(c.length - 18, supplyOutput.length));
+				burntOutput.innerText = (originalTokenAmount - supply).toLocaleString();
+				supplyOutput.innerText = supply.toLocaleString();
+				document.title = supply.toLocaleString()+" COVX Coins Left";
 				
 				if (lastSupply) {
 					if (lastSupply !== supply) {
